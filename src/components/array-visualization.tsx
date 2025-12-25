@@ -1,4 +1,5 @@
 import type { AnimationState } from "@/types/array-operations"
+import { Button } from "./ui/button";
 
 type ArrayVisualizationProps = {
     state: AnimationState | null | undefined
@@ -14,26 +15,7 @@ export function ArrayVisualization({ state }: ArrayVisualizationProps) {
     const SVG_HEIGHT = 350;
 
     if (!state) {
-        return (
-            <div className="bg-slate-800/50 rounded-2xl p-8 backdrop-blur border border-slate-700">
-                <svg
-                    viewBox={`0 0 ${START_X * 2 + BLOCK_WIDTH} ${SVG_HEIGHT}`}
-                    className="w-full"
-                    style={{ minHeight: '350px' }}
-                >
-                    <text
-                        x="50%"
-                        y="50%"
-                        textAnchor="middle"
-                        fill="#94a3b8"
-                        fontSize="18"
-                        fontWeight="500"
-                    >
-                        Execute an operation to start visualization
-                    </text>
-                </svg>
-            </div>
-        )
+        return null
     }
 
 
@@ -48,7 +30,7 @@ export function ArrayVisualization({ state }: ArrayVisualizationProps) {
     const getBlockX = (index: number) => START_X + index * (BLOCK_WIDTH + GAP);
 
     return (
-        <div className="bg-slate-800/50 rounded-2xl p-8 backdrop-blur border border-slate-700">
+        <div className="bg-gradient-to-br from-muted/30 to-muted/60 rounded-2xl p-8 backdrop-blur border">
             <svg
                 viewBox={`0 0 ${svgWidth} ${SVG_HEIGHT}`}
                 className="w-full"
