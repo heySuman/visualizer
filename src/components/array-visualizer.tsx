@@ -167,17 +167,17 @@ export default function ArrayVisualizer() {
     return (
         <section className="max-w-7xl mx-auto p-6 space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Array Operations Visualizer</h1>
+                <h1 className="text-2xl font-bold">Basic array operations</h1>
                 <Button variant="outline" onClick={resetVisualization}>Exit</Button>
             </div>
 
             {/* Playback Controls */}
-            <div className="flex justify-center gap-2 p-4 bg-muted/50 rounded-lg">
+            <div className="flex justify-center gap-2 p-4 rounded-lg">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon-lg"
                             onClick={handleBack}
                             disabled={activeIndex === 0 || isPlaying}
                         >
@@ -191,7 +191,7 @@ export default function ArrayVisualizer() {
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon-lg"
                             onClick={handleResume}
                             disabled={isPlaying || activeIndex >= history.length - 1}
                         >
@@ -205,7 +205,7 @@ export default function ArrayVisualizer() {
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon-lg"
                             onClick={handlePause}
                             disabled={!isPlaying}
                         >
@@ -219,7 +219,7 @@ export default function ArrayVisualizer() {
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon-lg"
                             onClick={handleNext}
                             disabled={activeIndex >= history.length - 1 || isPlaying}
                         >
@@ -233,7 +233,7 @@ export default function ArrayVisualizer() {
                     <TooltipTrigger asChild>
                         <Button
                             variant="outline"
-                            size="icon"
+                            size="icon-lg"
                             onClick={handleReset}
                             disabled={isPlaying}
                         >
@@ -242,19 +242,11 @@ export default function ArrayVisualizer() {
                     </TooltipTrigger>
                     <TooltipContent>Reset</TooltipContent>
                 </Tooltip>
-
-                <div className="ml-4 px-4 py-2 bg-background rounded-md border text-sm font-medium">
-                    Step {activeIndex + 1} / {history.length}
-                </div>
             </div>
 
-            {/* Array Visualization */}
-            <ArrayVisualization state={history[activeIndex]} />
 
-            {/* Operation Selection */}
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Select Operation</h2>
-                <div className="grid grid-cols-5 gap-3">
+                <div className="flex justify-center items-center gap-3">
                     <Button
                         size="lg"
                         variant={selectedOperation === "push" ? "default" : "secondary"}
@@ -300,10 +292,9 @@ export default function ArrayVisualizer() {
 
             {/* Input Panel */}
             {selectedOperation && (
-                <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+                <div className="rounded-lg p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold capitalize">{selectedOperation} Operation</h3>
-                        <Button variant="ghost" size="sm" onClick={handleCancel}>Cancel</Button>
+                        <Button variant="secondary" size="sm" onClick={handleCancel}>Cancel</Button>
                     </div>
 
                     {error && (
@@ -405,6 +396,8 @@ export default function ArrayVisualizer() {
                     </Button>
                 </div>
             )}
+
+            <ArrayVisualization state={history[activeIndex]} />
         </section>
     )
 }

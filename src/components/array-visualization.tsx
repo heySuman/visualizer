@@ -1,5 +1,4 @@
 import type { AnimationState } from "@/types/array-operations"
-import { Button } from "./ui/button";
 
 type ArrayVisualizationProps = {
     state: AnimationState | null | undefined
@@ -7,91 +6,66 @@ type ArrayVisualizationProps = {
 
 export function ArrayVisualization({ state }: ArrayVisualizationProps) {
 
-    const BLOCK_WIDTH = 70;
-    const BLOCK_HEIGHT = 60;
+    const BLOCK_WIDTH = 20;
+    const BLOCK_HEIGHT = 20;
     const GAP = 15;
     const START_X = 50;
     const BLOCK_Y = 80;
     const SVG_HEIGHT = 350;
+    const ARROW_GAP = 20;
+    const ARROW_HEAD_Y = BLOCK_Y + BLOCK_HEIGHT + ARROW_GAP;
 
     if (!state) {
         return null
     }
 
-
     const { array, highlightIndices, arrowPosition, arrowLabel, message } = state;
 
-    // Calculate SVG width based on array length
     const svgWidth = Math.max(
-        800,
+        500,
         START_X * 2 + array.length * (BLOCK_WIDTH + GAP)
     );
 
     const getBlockX = (index: number) => START_X + index * (BLOCK_WIDTH + GAP);
 
     return (
-        <div className="bg-gradient-to-br from-muted/30 to-muted/60 rounded-2xl p-8 backdrop-blur border">
+        <div className="border rounded-2xl">
             <svg
                 viewBox={`0 0 ${svgWidth} ${SVG_HEIGHT}`}
-                className="w-full"
                 style={{ minHeight: '350px' }}
             >
-                {/* Array Blocks */}
                 {array.map((value, index) => {
                     const x = getBlockX(index);
                     const isHighlight = highlightIndices.includes(index);
 
                     return (
                         <g key={`block-${index}-${value}`}>
-                            {/* Shadow */}
-                            <rect
-                                x={x + 2}
-                                y={BLOCK_Y + 2}
-                                width={BLOCK_WIDTH}
-                                height={BLOCK_HEIGHT}
-                                rx="10"
-                                fill="rgba(0,0,0,0.3)"
-                            />
-
-                            {/* Block */}
                             <rect
                                 x={x}
                                 y={BLOCK_Y}
                                 width={BLOCK_WIDTH}
                                 height={BLOCK_HEIGHT}
-                                rx="10"
-                                fill={isHighlight ? '#3b82f6' : '#475569'}
-                                stroke={isHighlight ? '#60a5fa' : '#64748b'}
-                                strokeWidth="2"
-                                style={{
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    filter: isHighlight
-                                        ? 'drop-shadow(0 4px 12px rgba(59, 130, 246, 0.6))'
-                                        : 'none',
-                                }}
+                                strokeWidth="0.5"
+                                className={`${isHighlight ? 'fill-primary' : 'fill-secondary'} rounded-2xl stroke-primary/50`}
+                                rx={1}
                             />
 
-                            {/* Value */}
                             <text
                                 x={x + BLOCK_WIDTH / 2}
-                                y={BLOCK_Y + BLOCK_HEIGHT / 2 + 6}
+                                y={BLOCK_Y + BLOCK_HEIGHT / 2 + 4}
                                 textAnchor="middle"
-                                fill="white"
-                                fontSize="24"
-                                fontWeight="bold"
-                                fontFamily="monospace"
+                                fill={isHighlight ? "white" : "black"}
+                                fontSize="10"
                             >
                                 {value}
                             </text>
 
-                            {/* Index Label */}
                             <text
                                 x={x + BLOCK_WIDTH / 2}
-                                y={BLOCK_Y + BLOCK_HEIGHT + 25}
+                                y={BLOCK_Y + BLOCK_HEIGHT + 15}
                                 textAnchor="middle"
                                 fill="#94a3b8"
-                                fontSize="14"
-                                fontFamily="monospace"
+                                fontSize="8"
                             >
                                 {index}
                             </text>
@@ -99,72 +73,60 @@ export function ArrayVisualization({ state }: ArrayVisualizationProps) {
                     );
                 })}
 
-                {/* Arrow */}
                 {arrowPosition !== undefined && (
                     <g
                         style={{
-                            transform: `translateX(${getBlockX(arrowPosition) + BLOCK_WIDTH / 2 - 30
-                                }px)`,
+                            transform: `translateX(${getBlockX(arrowPosition) + BLOCK_WIDTH / 2 - 30}px)`,
                             transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                         }}
                     >
-                        {/* Arrow shaft */}
                         <line
                             x1="30"
-                            y1="200"
+                            y1={ARROW_HEAD_Y + 8}
                             x2="30"
-                            y2="165"
-                            stroke="#ef4444"
-                            strokeWidth="3"
+                            y2={ARROW_HEAD_Y + 30}
+                            strokeWidth="1"
+                            className="stroke-primary"
                         />
 
-                        {/* Arrow head */}
-                        <path d="M 30 160 L 25 170 L 35 170 Z" fill="#ef4444" />
-
-                        {/* Label background */}
-                        <rect
-                            x="0"
-                            y="210"
-                            width="60"
-                            height="30"
-                            rx="6"
-                            fill="#1e293b"
-                            stroke="#ef4444"
-                            strokeWidth="2"
+                        <path
+                            d={`
+                                M 30 ${ARROW_HEAD_Y}
+                                L 27 ${ARROW_HEAD_Y + 8}
+                                L 33 ${ARROW_HEAD_Y + 8}
+                                Z
+                            `}
+                            className="fill-primary"
                         />
 
-                        {/* Label text */}
                         <text
                             x="30"
-                            y="230"
+                            y={ARROW_HEAD_Y + 45}
                             textAnchor="middle"
-                            fill="#ef4444"
-                            fontSize="12"
-                            fontWeight="600"
+                            fontSize="8"
+                            className="fill-primary"
                         >
                             {arrowLabel}
                         </text>
                     </g>
                 )}
 
-                {/* Operation Display */}
                 <g>
                     <rect
                         x="20"
-                        y="270"
+                        y={ARROW_HEAD_Y + 20}
                         width={svgWidth - 40}
-                        height="60"
-                        rx="8"
-                        fill="#1e293b"
-                        stroke="#334155"
-                        strokeWidth="2"
+                        height="50"
+                        rx="4"
+                        className="stroke-primary fill-gray-400"
+                        strokeWidth="1"
                     />
 
-                    <text x="40" y="295" fill="#94a3b8" fontSize="14" fontWeight="600">
+                    <text x="40" y={ARROW_HEAD_Y + 40} fontSize="8" fontWeight="600">
                         OPERATION:
                     </text>
 
-                    <text x="40" y="318" fill="#e2e8f0" fontSize="18" fontWeight="500">
+                    <text x="40" y={ARROW_HEAD_Y + 50} fill="#e2e8f0" fontSize="8" fontWeight="500">
                         {message}
                     </text>
                 </g>
