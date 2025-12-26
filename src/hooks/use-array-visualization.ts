@@ -17,6 +17,7 @@ export function useArrayVisualizationControl({
     const [isPlaying, setIsPlaying] = useState(false);
     const [history, setHistory] = useState<AnimationState[]>([])
     const [activeIndex, setActiveIndex] = useState<number>(0);
+    const [currentSpeed, setCurrentSpeed] = useState(speed);
 
     useEffect(() => {
         if (!isPlaying) return;
@@ -34,10 +35,10 @@ export function useArrayVisualizationControl({
                 }
                 return prev + 1;
             });
-        }, speed);
+        }, currentSpeed);
 
         return () => clearInterval(interval);
-    }, [isPlaying, activeIndex, history.length, speed]);
+    }, [isPlaying, activeIndex, history.length, currentSpeed]);
 
     const currentStep = history[activeIndex] || null;
 
@@ -78,5 +79,6 @@ export function useArrayVisualizationControl({
         handleReset,
         setHistory,
         history,
+        setSpeed: setCurrentSpeed,
     };
 }

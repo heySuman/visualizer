@@ -13,7 +13,8 @@ type OperationType = "push" | "pop" | "slice" | "find" | "splice";
 export default function ArrayVisualizer() {
     const [array, setArray] = useState<number[]>([])
     const [isStarted, setIsStarted] = useState(false)
-    const { history, activeIndex, isPlaying, handleBack, handlePause, handleReset, handleNext, handleResume, setHistory } = useArrayVisualizationControl({ speed: 1000 })
+    const [speed, setSpeed] = useState(800)
+    const { history, activeIndex, isPlaying, handleBack, handlePause, handleReset, handleNext, handleResume, setHistory, setSpeed: setAnimationSpeed } = useArrayVisualizationControl({ speed })
     const [selectedOperation, setSelectedOperation] = useState<OperationType | null>(null)
 
     // Input state for operations
@@ -60,6 +61,11 @@ export default function ArrayVisualizer() {
             }
 
             setHistory(animationSteps)
+
+            // Auto-play the animation after setting history
+            setTimeout(() => {
+                handleResume()
+            }, 100)
 
             if (operation !== 'slice' && animationSteps.length > 0) {
                 const finalState = animationSteps[animationSteps.length - 1]
@@ -150,12 +156,39 @@ export default function ArrayVisualizer() {
     if (!isStarted) {
         return (
             <section className="min-h-screen flex items-center justify-center p-4">
-                <div className="text-center space-y-6">
-                    <div className="space-y-2">
-                        <h1 className="text-4xl font-bold tracking-tight">Array Visualizer</h1>
-                        <p className="text-muted-foreground text-lg">Visualize and understand array operations</p>
+                <div className="text-center space-y-8 max-w-2xl">
+                    <div className="space-y-4">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4">
+                            <PlayCircle className="w-10 h-10 text-white" />
+                        </div>
+                        <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+                            Array Operations Visualizer
+                        </h1>
+                        <p className="text-muted-foreground text-lg max-w-md mx-auto">
+                            Learn and visualize how array methods work with interactive step-by-step animations
+                        </p>
                     </div>
-                    <Button size="lg" onClick={handleStart} className="gap-2">
+
+                    <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                            <span>Push & Pop</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                            <span>Find Elements</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                            <span>Slice & Splice</span>
+                        </div>
+                    </div>
+
+                    <Button
+                        size="lg"
+                        onClick={handleStart}
+                        className="gap-2 text-base px-8 py-6 shadow-lg hover:shadow-xl transition-all"
+                    >
                         <PlayCircle className="w-5 h-5" />
                         Start Visualization
                     </Button>
@@ -165,239 +198,273 @@ export default function ArrayVisualizer() {
     }
 
     return (
-        <section className="max-w-7xl mx-auto p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Basic array operations</h1>
-                <Button variant="outline" onClick={resetVisualization}>Exit</Button>
+        <section className="max-w-7xl mx-auto p-4 space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b pb-3">
+                <div>
+                    <h1 className="text-xl font-bold">Array Operations Visualizer</h1>
+                    <p className="text-sm text-muted-foreground">Interactive array manipulation and visualization</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={resetVisualization}>Exit</Button>
+            </div>
+
+            {/* Visualization Area */}
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg border shadow-sm">
+                <ArrayVisualization state={history[activeIndex]} />
             </div>
 
             {/* Playback Controls */}
-            <div className="flex justify-center gap-2 p-4 rounded-lg">
+            <div className="flex items-center justify-center gap-3 py-2">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
-                            variant="outline"
-                            size="icon-lg"
-                            onClick={handleBack}
-                            disabled={activeIndex === 0 || isPlaying}
-                        >
-                            <ArrowLeftToLine className="w-4 h-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Previous Step</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon-lg"
-                            onClick={handleResume}
-                            disabled={isPlaying || activeIndex >= history.length - 1}
-                        >
-                            <Play className="w-4 h-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Play</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon-lg"
-                            onClick={handlePause}
-                            disabled={!isPlaying}
-                        >
-                            <Pause className="w-4 h-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Pause</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon-lg"
-                            onClick={handleNext}
-                            disabled={activeIndex >= history.length - 1 || isPlaying}
-                        >
-                            <ArrowRightToLine className="w-4 h-4" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Next Step</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon-lg"
+                            variant="ghost"
+                            size="icon"
                             onClick={handleReset}
-                            disabled={isPlaying}
+                            disabled={isPlaying || activeIndex === 0}
+                            className="h-8 w-8"
                         >
-                            <RotateCcw className="w-4 h-4" />
+                            <RotateCcw className="w-3.5 h-3.5" />
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent>Reset</TooltipContent>
                 </Tooltip>
-            </div>
 
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleBack}
+                            disabled={activeIndex === 0 || isPlaying}
+                            className="h-8 w-8"
+                        >
+                            <ArrowLeftToLine className="w-3.5 h-3.5" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Previous</TooltipContent>
+                </Tooltip>
 
-            <div className="space-y-4">
-                <div className="flex justify-center items-center gap-3">
-                    <Button
-                        size="lg"
-                        variant={selectedOperation === "push" ? "default" : "secondary"}
-                        onClick={() => handleOperationClick('push')}
-                        disabled={isPlaying}
-                    >
-                        Push
-                    </Button>
-                    <Button
-                        size="lg"
-                        variant={selectedOperation === "pop" ? "default" : "secondary"}
-                        onClick={() => handleOperationClick('pop')}
-                        disabled={isPlaying || array.length === 0}
-                    >
-                        Pop
-                    </Button>
-                    <Button
-                        size="lg"
-                        variant={selectedOperation === "find" ? "default" : "secondary"}
-                        onClick={() => handleOperationClick('find')}
-                        disabled={isPlaying || array.length === 0}
-                    >
-                        Find
-                    </Button>
-                    <Button
-                        size="lg"
-                        variant={selectedOperation === "slice" ? "default" : "secondary"}
-                        onClick={() => handleOperationClick('slice')}
-                        disabled={isPlaying || array.length === 0}
-                    >
-                        Slice
-                    </Button>
-                    <Button
-                        size="lg"
-                        variant={selectedOperation === "splice" ? "default" : "secondary"}
-                        onClick={() => handleOperationClick('splice')}
-                        disabled={isPlaying || array.length === 0}
-                    >
-                        Splice
-                    </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant={isPlaying ? "secondary" : "default"}
+                            size="icon"
+                            onClick={isPlaying ? handlePause : handleResume}
+                            disabled={activeIndex >= history.length - 1 && !isPlaying}
+                            className="h-9 w-9"
+                        >
+                            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{isPlaying ? 'Pause' : 'Play'}</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleNext}
+                            disabled={activeIndex >= history.length - 1 || isPlaying}
+                            className="h-8 w-8"
+                        >
+                            <ArrowRightToLine className="w-3.5 h-3.5" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Next</TooltipContent>
+                </Tooltip>
+
+                <div className="flex items-center gap-2 ml-2">
+                    <div className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
+                        {activeIndex + 1} / {history.length}
+                    </div>
+
+                    <div className="flex items-center gap-2 border-l pl-3">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">Speed:</span>
+                        <input
+                            type="range"
+                            min="300"
+                            max="2000"
+                            step="100"
+                            value={speed}
+                            onChange={(e) => {
+                                const newSpeed = parseInt(e.target.value)
+                                setSpeed(newSpeed)
+                                setAnimationSpeed(newSpeed)
+                            }}
+                            className="w-20 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            disabled={isPlaying}
+                        />
+                        <span className="text-xs text-muted-foreground w-8 text-right">
+                            {speed < 600 ? '2x' : speed < 1000 ? '1.5x' : speed < 1500 ? '1x' : '0.5x'}
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            {/* Input Panel */}
-            {selectedOperation && (
-                <div className="rounded-lg p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <Button variant="secondary" size="sm" onClick={handleCancel}>Cancel</Button>
-                    </div>
+            {/* Operations Panel */}
+            <div className="border rounded-lg p-4 bg-white dark:bg-slate-950">
+                <h2 className="text-sm font-semibold mb-3">Operations</h2>
 
-                    {error && (
-                        <Alert variant="destructive">
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
+                {error && (
+                    <Alert variant="destructive" className="mb-3">
+                        <AlertDescription className="text-xs">{error}</AlertDescription>
+                    </Alert>
+                )}
 
-                    <div className="space-y-3">
+                {/* Operation Buttons and Inline Inputs */}
+                <div className="flex flex-wrap gap-2">
+                    {/* Push Operation */}
+                    <div className="flex items-center gap-1.5">
+                        <Button
+                            size="sm"
+                            variant={selectedOperation === "push" ? "default" : "secondary"}
+                            onClick={() => handleOperationClick('push')}
+                            disabled={isPlaying}
+                            className="h-8"
+                        >
+                            Push
+                        </Button>
                         {selectedOperation === 'push' && (
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Value to push:</label>
+                            <>
                                 <Input
                                     type="number"
-                                    placeholder="Enter a number"
+                                    placeholder="value"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                                    className="h-8 w-20 text-xs"
+                                    autoFocus
                                 />
-                            </div>
-                        )}
-
-                        {selectedOperation === 'pop' && (
-                            <p className="text-sm text-muted-foreground">
-                                This will remove the last element from the array.
-                            </p>
-                        )}
-
-                        {selectedOperation === 'find' && (
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Value to find:</label>
-                                <Input
-                                    type="number"
-                                    placeholder="Enter a number"
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                                />
-                            </div>
-                        )}
-
-                        {selectedOperation === 'slice' && (
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Start index:</label>
-                                    <Input
-                                        type="number"
-                                        placeholder="0"
-                                        value={inputIndex}
-                                        onChange={(e) => setInputIndex(e.target.value)}
-                                        min="0"
-                                        max={array.length.toString()}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">End index (exclusive):</label>
-                                    <Input
-                                        type="number"
-                                        placeholder={array.length.toString()}
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                                        min="0"
-                                        max={array.length.toString()}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {selectedOperation === 'splice' && (
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Index:</label>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter index"
-                                        value={inputIndex}
-                                        onChange={(e) => setInputIndex(e.target.value)}
-                                        min="0"
-                                        max={(array.length - 1).toString()}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">New value (optional):</label>
-                                    <Input
-                                        type="number"
-                                        placeholder="Leave empty to delete"
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                                    />
-                                </div>
-                            </div>
+                                <Button size="sm" onClick={handleSubmit} className="h-8 text-xs">Go</Button>
+                                <Button size="sm" variant="ghost" onClick={handleCancel} className="h-8 text-xs">×</Button>
+                            </>
                         )}
                     </div>
 
-                    <Button onClick={handleSubmit} className="w-full">
-                        Execute {selectedOperation}
-                    </Button>
-                </div>
-            )}
+                    {/* Pop Operation */}
+                    <div className="flex items-center gap-1.5">
+                        <Button
+                            size="sm"
+                            variant={selectedOperation === "pop" ? "default" : "secondary"}
+                            onClick={() => selectedOperation === 'pop' ? executeOperation('pop') : handleOperationClick('pop')}
+                            disabled={isPlaying || array.length === 0}
+                            className="h-8"
+                        >
+                            Pop
+                        </Button>
+                    </div>
 
-            <ArrayVisualization state={history[activeIndex]} />
+                    {/* Find Operation */}
+                    <div className="flex items-center gap-1.5">
+                        <Button
+                            size="sm"
+                            variant={selectedOperation === "find" ? "default" : "secondary"}
+                            onClick={() => handleOperationClick('find')}
+                            disabled={isPlaying || array.length === 0}
+                            className="h-8"
+                        >
+                            Find
+                        </Button>
+                        {selectedOperation === 'find' && (
+                            <>
+                                <Input
+                                    type="number"
+                                    placeholder="value"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                                    className="h-8 w-20 text-xs"
+                                    autoFocus
+                                />
+                                <Button size="sm" onClick={handleSubmit} className="h-8 text-xs">Go</Button>
+                                <Button size="sm" variant="ghost" onClick={handleCancel} className="h-8 text-xs">×</Button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Slice Operation */}
+                    <div className="flex items-center gap-1.5">
+                        <Button
+                            size="sm"
+                            variant={selectedOperation === "slice" ? "default" : "secondary"}
+                            onClick={() => handleOperationClick('slice')}
+                            disabled={isPlaying || array.length === 0}
+                            className="h-8"
+                        >
+                            Slice
+                        </Button>
+                        {selectedOperation === 'slice' && (
+                            <>
+                                <Input
+                                    type="number"
+                                    placeholder="start"
+                                    value={inputIndex}
+                                    onChange={(e) => setInputIndex(e.target.value)}
+                                    className="h-8 w-16 text-xs"
+                                    autoFocus
+                                />
+                                <Input
+                                    type="number"
+                                    placeholder="end"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                                    className="h-8 w-16 text-xs"
+                                />
+                                <Button size="sm" onClick={handleSubmit} className="h-8 text-xs">Go</Button>
+                                <Button size="sm" variant="ghost" onClick={handleCancel} className="h-8 text-xs">×</Button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Splice Operation */}
+                    <div className="flex items-center gap-1.5">
+                        <Button
+                            size="sm"
+                            variant={selectedOperation === "splice" ? "default" : "secondary"}
+                            onClick={() => handleOperationClick('splice')}
+                            disabled={isPlaying || array.length === 0}
+                            className="h-8"
+                        >
+                            Splice
+                        </Button>
+                        {selectedOperation === 'splice' && (
+                            <>
+                                <Input
+                                    type="number"
+                                    placeholder="index"
+                                    value={inputIndex}
+                                    onChange={(e) => setInputIndex(e.target.value)}
+                                    className="h-8 w-16 text-xs"
+                                    autoFocus
+                                />
+                                <Input
+                                    type="number"
+                                    placeholder="value"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                                    className="h-8 w-16 text-xs"
+                                />
+                                <Button size="sm" onClick={handleSubmit} className="h-8 text-xs">Go</Button>
+                                <Button size="sm" variant="ghost" onClick={handleCancel} className="h-8 text-xs">×</Button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Help Text */}
+                <div className="mt-3 text-xs text-muted-foreground">
+                    {!selectedOperation && "Select an operation to begin"}
+                    {selectedOperation === 'push' && "Enter a value to add to the end of the array"}
+                    {selectedOperation === 'pop' && "Click again to remove the last element"}
+                    {selectedOperation === 'find' && "Enter a value to search in the array"}
+                    {selectedOperation === 'slice' && "Enter start and end indices to extract a portion"}
+                    {selectedOperation === 'splice' && "Enter index and optional value (leave empty to delete)"}
+                </div>
+            </div>
         </section>
     )
 }
